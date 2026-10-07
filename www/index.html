@@ -3,7 +3,7 @@
 </style><script>
 window.DORAMA_CONFIG = {
   backendUrl: localStorage.getItem("dorama_backend_url") || "",
-  appVersion: "1.4.0",
+  appVersion: "1.5.0",
   platform: "android"
 };
 </script>
@@ -32,7 +32,7 @@ async function syncProject(){
  const chars=(current.characters||[]).map((c,i)=>({dorama_id:current.cloudId,user_id:sessionUser.id,name:c.name,role:c.role||null,personality:c.bio||null,visual_identity:c.visual?.identity||null,wardrobe:c.visual?.style||null,portrait_url:c.imageUrl||null,relationships:[],sort_order:i}));
  const eps=(current.episodes||[]).map(e=>({dorama_id:current.cloudId,user_id:sessionUser.id,episode_number:e.number,title:e.title||null,summary:e.summary||null,scenes:e.script?.scenes||[],cliffhanger:e.script?.hook||null,status:e.script?'completed':'planned'}));
  let x=await sb.from('characters').delete().eq('dorama_id',current.cloudId); if(x.error)throw x.error; if(chars.length){x=await sb.from('characters').insert(chars);if(x.error)throw x.error;}
- x=await sb.from('episodes').delete().eq('dorama_id',current.cloudId); if(x.error)throw x.error; if(eps.length){x=await sb.from('episodes').insert(eps);if(x.error)throw x.error;}
+ if(eps.length){x=await sb.from('episodes').upsert(eps,{onConflict:'dorama_id,episode_number'});if(x.error)throw x.error;}
  const memory={dorama_id:current.cloudId,user_id:sessionUser.id,facts:current.memory||[],unresolved_conflicts:[],relationship_state:[],revealed_secrets:[],timeline:(current.episodes||[]).filter(e=>e.script).map(e=>({episode:e.number,summary:e.summary,cliffhanger:e.script?.hook||null}))};
  x=await sb.from('story_memory').upsert(memory,{onConflict:'dorama_id'}); if(x.error)throw x.error;
  localStorage.setItem('doramaProjectV13',JSON.stringify(current));
@@ -71,8 +71,8 @@ async function requestVisual(kind,i){
   if(error) throw error;
   if(!data?.imageUrl) throw new Error(data?.error||'A IA não retornou a imagem.');
   if(kind==='poster'){current.posterUrl=data.imageUrl;target.innerHTML=`<img src="${esc(data.imageUrl)}" alt="Pôster">`;}else{current.characters[i].imageUrl=data.imageUrl;renderSeries();}
-  saveProject(false);
-  await syncProject();
+  localStorage.setItem('doramaProjectV13',JSON.stringify(current));
+await syncProject();
  }catch(e){
   const msg=e?.context?.body?.error||e?.message||'Falha ao gerar imagem.';
   if(target)target.textContent='Erro: '+msg;else alert('Erro ao gerar imagem: '+msg);
