@@ -1,0 +1,9 @@
+{
+  "appId": "br.com.doramastudio.ai",
+  "appName": "Dorama Studio AI",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "backgroundColor": "#0b0710"
+}
