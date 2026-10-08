@@ -87,7 +87,23 @@ async function generateEpisode(){
   const {data:{session}}=await sb.auth.getSession();
   if(!session?.access_token) throw new Error('Entre na sua conta para usar o roteirista com IA.');
   const {data,error}=await sb.functions.invoke('generate-dorama',{body:{action:'generate_episode',project:current,episodeNumber:selectedEpisode}});
-  if(error) throw new Error(error.message||'Falha ao chamar a IA.');
+  if(error){
+   let detail=error.message||'Falha ao chamar a IA.';
+   const response=error.context;
+   if(response){
+    try{
+     const payload=await response.clone().json();
+     const serverMessage=payload?.error||payload?.message||payload?.details;
+     if(serverMessage) detail=String(serverMessage);
+     else if(response.status) detail+=' (HTTP '+response.status+')';
+    }catch(_){
+     if(response.status) detail+=' (HTTP '+response.status+')';
+    }
+    if(response.status===429 || /AI_PROVIDER_429|AI_RATE_LIMIT_REACHED|rate.limit/i.test(detail)) detail='A IA atingiu o limite temporário de geração. Aguarde alguns minutos antes de tentar novamente.';
+   }
+   if(/Failed to send a request/i.test(detail)) detail='Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
+   throw new Error(detail);
+  }
   if(!data?.ok||!data?.result?.episode) throw new Error(data?.error||'A IA não retornou um episódio válido.');
   const ai=data.result.episode;
   e.title=ai.title||e.title;e.summary=ai.summary||e.summary;
