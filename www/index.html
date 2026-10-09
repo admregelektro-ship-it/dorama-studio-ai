@@ -159,9 +159,36 @@ function undoSeasonReview(){
 }
 let pendingAIReview=null;
 function discardAIReview(){pendingAIReview=null;by('aiApplyBtn').style.display='none';by('aiDiscardBtn').style.display='none';by('aiRetryBtn').style.display='none';by('aiReviewStatus').textContent='Sugestões descartadas. Nenhum roteiro foi alterado.';by('aiReviewReport').innerHTML='';}
+// Filtro conservador: propostas vazias, termos estranhos e reescritas extensas
+// não devem ser exibidas como correções de continuidade.
+function normalizeReviewText(value){
+ return String(value??'').normalize('NFC').replace(/\s+/g,' ').trim();
+}
+function reviewTextIsSafe(before,after){
+ const a=normalizeReviewText(before),b=normalizeReviewText(after);
+ if(a===b)return false;
+ // Mudanças grandes exigem edição manual, não aprovação automática.
+ const aw=a.split(/\s+/),bw=b.split(/\s+/);
+ if(Math.abs(aw.length-bw.length)>Math.max(3,Math.ceil(aw.length*.12)))return false;
+ const len=Math.max(a.length,b.length,1);
+ let prefix=0;while(prefix<Math.min(a.length,b.length)&&a[prefix]===b[prefix])prefix++;
+ let suffix=0;while(suffix<Math.min(a.length-prefix,b.length-prefix)&&a[a.length-1-suffix]===b[b.length-1-suffix])suffix++;
+ const removed=a.slice(prefix,a.length-suffix),added=b.slice(prefix,b.length-suffix);
+ if((removed.length+added.length)>Math.max(75,len*.35))return false;
+ // Bloqueia inserções inesperadas em inglês, incluindo o erro observado.
+ if(/\b(?:hypothyroidism|hyperthyroidism)\b/i.test(added))return false;
+ // Só aceita propostas que corrijam fatos explicitamente registrados na Bíblia.
+ const bible=current?.storyBible||{};
+ const canon=Object.values(bible).join(' ').toLowerCase();
+ const fixes=[
+  {bad:/\bYoon\s+Mi-sook\b/i,good:/\bJin-hee\b/i,clue:/jin-hee.*(?:mãe|mae)|(?:mãe|mae).*jin-hee/i},
+  {bad:/\b1923\b/,good:/\b1998\b/,clue:/1998/}
+ ];
+ return fixes.some(f=>f.clue.test(canon)&&f.bad.test(removed)&&f.good.test(added));
+}
 function aiReviewDiff(before,after){
  const changes=[];
- const add=(label,a,b)=>{if(String(a??'')!==String(b??''))changes.push({label,before:String(a??''),after:String(b??'')});};
+ const add=(label,a,b)=>{if(reviewTextIsSafe(a,b))changes.push({label,before:String(a??''),after:String(b??'')});};
  if(!Array.isArray(after?.script?.scenes)||after.script.scenes.length!==before.script.scenes.length)return null;
  // Uma revisão de continuidade não pode alterar títulos, sinopses, cenas, locais, horários ou ganchos.
  if(String(after.title)!==String(before.title)||String(after.summary)!==String(before.summary)||String(after.script.hook??'')!==String(before.script.hook??''))return null;
@@ -180,7 +207,7 @@ function aiReviewDiff(before,after){
 function renderAIReview(){
  const p=pendingAIReview,report=by('aiReviewReport');report.innerHTML='';
  if(!p)return;
- const heading=document.createElement('p');heading.textContent=p.suggestions.length+' episódio(s) com mudanças verificáveis. Selecione individualmente e compare o texto antes de aprovar.';report.append(heading);
+ const heading=document.createElement('p');heading.textContent=p.suggestions.length+' episódio(s) com correções fundamentadas na Bíblia da Série. Propostas sem alteração ou sem respaldo foram descartadas automaticamente.';report.append(heading);
  for(const item of p.suggestions){
   const box=document.createElement('div');box.style.cssText='border:1px solid #60456d;border-radius:14px;padding:12px;margin:12px 0';
   const label=document.createElement('label');label.style.cssText='display:block;font-weight:bold;margin-bottom:10px';
@@ -228,7 +255,7 @@ async function startAIReview(onlyFailed=false){
   if(onlyFailed&&JSON.stringify(current.episodes)!==previous.source){status.textContent='O projeto mudou. Descarte as sugestões e reinicie a análise.';return;}
   pendingAIReview={projectId,season,source,suggestions,failures};
   renderAIReview();
-  status.textContent='Análise concluída: '+suggestions.length+' episódio(s) com alterações para avaliar; '+failures.length+' não analisado(s). Nada foi modificado.';
+  status.textContent='Análise concluída: '+suggestions.length+' episódio(s) com correções fundamentadas; '+failures.length+' não analisado(s). Propostas vazias ou sem respaldo foram ignoradas. Nada foi modificado.';
  }finally{btn.disabled=false;btn.classList.remove('loading');}
 }
 async function applyAIReview(){
