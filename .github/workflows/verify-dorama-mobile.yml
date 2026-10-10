@@ -1,0 +1,24 @@
+name: Verify Dorama Mobile
+on:
+  push:
+    paths:
+      - "dorama-mobile/**"
+      - ".github/workflows/verify-dorama-mobile.yml"
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dorama-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Check TypeScript
+        run: npx tsc --noEmit
+      - name: Check Expo configuration
+        run: npx expo config --type public
