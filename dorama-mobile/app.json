@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Dorama Studio",
+    "slug": "dorama-studio",
+    "scheme": "doramastudio",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0913",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router"
+    ],
+    "android": {
+      "package": "com.doramastudio.app",
+      "versionCode": 1,
+      "edgeToEdgeEnabled": true
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
