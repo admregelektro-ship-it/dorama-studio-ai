@@ -39,3 +39,15 @@ test('painel de produção tem estilos e cenas expansíveis',()=>{
  assert.match(studio,/class="scene production-scene"/);
  assert.match(css,/\.production-progress/);
 });
+
+test('prévia sequencial encontra vídeos nos painéis expansíveis',()=>{
+ const studio=fs.readFileSync(path.join(root,'www/studio.js'),'utf8');
+ assert.match(studio,/#videoWorkspace \.production-scene video/);
+ assert.doesNotMatch(studio,/#videoWorkspace article video/);
+});
+test('exportação de dublagem está disponível por episódio',()=>{
+ const studio=fs.readFileSync(path.join(root,'www/studio.js'),'utf8');
+ assert.match(studio,/function exportDialogueScript\(/);
+ assert.match(studio,/Exportar roteiro de dublagem/);
+ assert.match(studio,/dublagem\.txt/);
+});
