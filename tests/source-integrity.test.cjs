@@ -22,3 +22,11 @@ test('estúdio inclui painel de produção e verificação sem prometer geraçã
   assert.match(studio,/geração automática por IA não está conectada/);
   assert.match(studio,/function fillMissingSceneDurations\(/);
 });
+
+test('prévia de diálogos usa síntese de voz local sem alegar exportação',()=>{
+ const studio=fs.readFileSync(path.join(root,'www/studio.js'),'utf8');
+ assert.match(studio,/function previewSceneDialogue\(/);
+ assert.match(studio,/SpeechSynthesisUtterance/);
+ assert.match(studio,/function stopSceneDialogue\(/);
+ assert.match(studio,/Áudio não foi gravado/);
+});
