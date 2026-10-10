@@ -51,3 +51,11 @@ test('exportação de dublagem está disponível por episódio',()=>{
  assert.match(studio,/Exportar roteiro de dublagem/);
  assert.match(studio,/dublagem\.txt/);
 });
+
+test('geração de vídeo usa função protegida e mantém estado por cena',()=>{
+ const studio=fs.readFileSync(path.join(root,'www/studio.js'),'utf8');
+ assert.match(studio,/functions\.invoke\('generate-video'/);
+ assert.match(studio,/function startAiSceneVideo\(/);
+ assert.match(studio,/function checkAiSceneVideo\(/);
+ assert.match(studio,/aiVideoTaskId/);
+});
