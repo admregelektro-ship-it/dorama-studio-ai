@@ -1,0 +1,50 @@
+name: Import Dorama Studio AI 2.4.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    if: github.ref == 'refs/heads/fix/scenes-production-android'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Extract package safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="dorama-studio-ai-2.4.0-completo.zip"
+          test -s "$ZIP" || { echo "::error::Upload $ZIP to the branch root first"; exit 1; }
+          python3 - <<'PY'
+          import pathlib,zipfile
+          root=pathlib.Path('.').resolve()
+          z=zipfile.ZipFile('dorama-studio-ai-2.4.0-completo.zip')
+          prefix='dorama-studio-ai-2.4.0/'
+          for info in z.infolist():
+              if info.is_dir(): continue
+              assert info.filename.startswith(prefix), f'Unexpected ZIP path: {info.filename}'
+              relative=pathlib.PurePosixPath(info.filename[len(prefix):])
+              assert relative.parts and '..' not in relative.parts, 'Unsafe ZIP path'
+              if relative.as_posix() in ('CHECKSUMS.sha256','test-results/test-report.txt','CONFIGURAR-E-VALIDAR.txt','MANIFEST.json','github/workflows/android-apk.yml'): continue
+              dest=root.joinpath(*relative.parts)
+              assert dest.resolve().is_relative_to(root), 'Unsafe extraction target'
+              dest.parent.mkdir(parents=True,exist_ok=True)
+              dest.write_bytes(z.read(info))
+          PY
+      - name: Validate and test
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+      - name: Commit imported sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- . ':!dorama-studio-ai-2.4.0-completo.zip'
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: import Dorama Studio AI 2.4.0 source"
+          git push origin HEAD:fix/scenes-production-android
