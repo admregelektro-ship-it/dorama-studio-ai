@@ -169,9 +169,10 @@ async function exportSilentEpisodeWebm(){
    try{
     await new Promise((resolve,reject)=>{video.onloadeddata=resolve;video.onerror=()=>reject(Error('Formato de vídeo incompatível na cena '+(i+1)));});
     if(status)status.textContent='Gravando cena '+(i+1)+' de '+scenes.length+' (sem áudio)...';
-    await video.play();
+    const playback=video.play();
+    await Promise.race([playback,new Promise((_,reject)=>setTimeout(()=>reject(Error('Reprodução não iniciou na cena '+(i+1))),12000))]);
     await new Promise((resolve,reject)=>{
-     let frame=0;const draw=()=>{try{if(video.ended){resolve();return;}ctx.fillStyle='#000';ctx.fillRect(0,0,640,360);const scale=Math.min(640/video.videoWidth,360/video.videoHeight),w=video.videoWidth*scale,h=video.videoHeight*scale;ctx.drawImage(video,(640-w)/2,(360-h)/2,w,h);frame=requestAnimationFrame(draw);}catch(e){reject(e);}};video.onended=()=>{cancelAnimationFrame(frame);resolve();};video.onerror=()=>{cancelAnimationFrame(frame);reject(Error('Erro na cena '+(i+1)));};draw();
+     let frame=0;const draw=()=>{try{if(video.ended){resolve();return;}if(video.readyState<2){frame=requestAnimationFrame(draw);return;}ctx.fillStyle='#000';ctx.fillRect(0,0,640,360);const scale=Math.min(640/video.videoWidth,360/video.videoHeight),w=video.videoWidth*scale,h=video.videoHeight*scale;ctx.drawImage(video,(640-w)/2,(360-h)/2,w,h);frame=requestAnimationFrame(draw);}catch(e){reject(e);}};video.onended=()=>{cancelAnimationFrame(frame);resolve();};video.onerror=()=>{cancelAnimationFrame(frame);reject(Error('Erro na cena '+(i+1)));};draw();
     });
    }finally{video.pause();video.removeAttribute('src');video.load();URL.revokeObjectURL(url);}
   }
