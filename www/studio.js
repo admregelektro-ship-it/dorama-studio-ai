@@ -176,7 +176,7 @@ async function startAiSceneVideo(i){
   const data=await callVideoProvider('create',{prompt:scene.videoPrompt||videoScenePrompt(scene,i)});
   await commitSceneChange(()=>{scene.aiVideoTaskId=data.taskId;scene.aiVideoStatus='pending';});
   notify('Geração solicitada para a cena '+(i+1)+'. Use Consultar geração para acompanhar.');
- }catch(e){notify('Geração indisponível: '+e.message);if(status)status.textContent=e.message;}
+ }catch(e){const unavailable=/no available channel|HTTP 503/i.test(String(e.message));const message=unavailable?'A Agnes não disponibilizou o modelo gratuito nesta conta. Nenhuma tarefa foi criada. Você pode importar clipes do celular ou usar a animação local enquanto o serviço não volta.':e.message;notify('Geração indisponível: '+message);if(status)status.textContent=message;}
 }
 async function checkAiSceneVideo(i){
  const scene=getVideoEpisode()?.script?.scenes?.[i];if(!scene)return;
