@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -32,11 +35,20 @@ jobs:
       - name: Instalar dependencias
         run: npm install --no-audit --no-fund
 
+      - name: Validar codigo
+        run: npm test
+
+      - name: Empacotar SDK Supabase e Capacitor
+        run: npm run build
+
       - name: Criar projeto Android
         run: npx cap add android
 
       - name: Sincronizar aplicativo
         run: npx cap sync android
+
+      - name: Preparar integracao Android
+        run: npm run android:prepare
 
       - name: Gerar APK
         working-directory: android
