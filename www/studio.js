@@ -174,7 +174,7 @@ async function exportDialogueScript(){
    for(const d of s.dialogue||[])lines.push(String(d.name||'Personagem')+': '+String(d.text||''));
    lines.push('');
   }
-  await downloadMaterial(new Blob([lines.join('\\n')],{type:'text/plain;charset=utf-8'}),'dorama-t'+(current?.activeSeason||1)+'-ep'+selectedEpisode+'-dublagem.txt');
+  await downloadMaterial(new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'}),'dorama-t'+(current?.activeSeason||1)+'-ep'+selectedEpisode+'-dublagem.txt');
   notify('Roteiro de dublagem exportado.');
  }catch(e){notify('Falha ao exportar dublagem: '+e.message);}
 }
