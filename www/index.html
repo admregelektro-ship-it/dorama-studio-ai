@@ -30,7 +30,7 @@ window.DORAMA_CONFIG = {
 <script src="project-store.js"></script><script src="vendor.js"></script>
 <script>
 const SUPABASE_URL = "https://zxmnefuwpulmikgqwxba.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "SUA_CHAVE_PUBLICAVEL_SUPABASE";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_7Xu5fiW5awH2QgNN3QbEsw_WGMmeLdK";
 const sb = window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) || {
  auth: {getSession: async()=>({data:{session:null}}),onAuthStateChange:()=>({}),signInWithPassword:async()=>({error:new Error('SDK indisponível. Reinstale a versão completa do aplicativo.')}),signUp:async()=>({error:new Error('SDK indisponível. Reinstale a versão completa do aplicativo.')}),signOut:async()=>({error:null})}
 };
