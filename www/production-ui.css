@@ -1,1 +1,25 @@
 .production-overview{padding:18px;border:1px solid #644268;border-radius:20px;background:#2a1b35;margin:14px 0 18px}.production-overview h3{font-size:21px;margin:5px 0}.production-overview strong{font-size:26px;color:#ff9ac8}.production-progress{height:10px;background:#110d1b;border-radius:999px;overflow:hidden;margin-top:16px}.production-progress span{display:block;height:100%;background:#d34e9a}.production-scene>summary{cursor:pointer;padding:17px;list-style:none}.production-scene>summary::-webkit-details-marker{display:none}.production-scene-body{padding:0 17px 17px;border-top:1px solid #44304f}#videoWorkspace .production-scene{padding:0;overflow:hidden}#videoWorkspace>.production-overview{grid-column:1/-1}
+/* Cinema-inspired streaming redesign: original styling, no third-party branding. */
+:root{color-scheme:dark}
+body{background:#08090d!important;color:#f5f5f5}
+.app{background:radial-gradient(ellipse at 80% -10%,#4b111b55,transparent 35%),linear-gradient(180deg,#151317 0%,#090a0d 65%)!important}
+.brand,.stream-kicker{color:#ff4755!important;letter-spacing:2px;font-weight:900}
+.hero h1,.studio-heading h2{letter-spacing:-.035em}
+.card,.scene,.scene-card,.production-overview{background:#18191e!important;border:1px solid #303036!important;border-radius:14px!important;box-shadow:0 9px 24px #00000025}
+.btn{border-radius:9px!important;transition:filter .15s ease,transform .15s ease}
+.btn:active{transform:scale(.985)}
+.btn.primary,.primary{background:linear-gradient(105deg,#e50914,#b70715)!important;box-shadow:0 8px 22px #e509142e!important;color:white!important}
+.btn.secondary,.secondary{background:#292a30!important;border-color:#42434b!important;color:#f6f6f6!important}
+.input,.textarea,.select{background:#111216!important;border-color:#41414a!important;border-radius:9px!important}
+.nav{background:#101115f5!important;border-top:1px solid #292b32!important}
+.nav button{color:#bfc0c6}
+.production-progress{background:#292a30}
+.production-progress span{background:#e50914}
+.production-overview strong{color:#ff4b56}
+#videoClipStatus:not(:empty){background:#24171a;border-color:#64343a}
+.production-scene>summary{background:linear-gradient(100deg,#25252b,#191a20);min-height:68px}
+.production-scene[open]>summary{border-bottom:2px solid #b50917}
+.production-scene-body{border-color:#33343b}
+#videoWorkspace .player{border-radius:10px;background:#050506}
+@media(min-width:700px){.app{max-width:1100px!important}}
+@media(prefers-reduced-motion:reduce){.btn{transition:none}}
