@@ -30,3 +30,12 @@ test('prévia de diálogos usa síntese de voz local sem alegar exportação',()
  assert.match(studio,/function stopSceneDialogue\(/);
  assert.match(studio,/Áudio não foi gravado/);
 });
+
+test('painel de produção tem estilos e cenas expansíveis',()=>{
+ const studio=fs.readFileSync(path.join(root,'www/studio.js'),'utf8');
+ const css=fs.readFileSync(path.join(root,'www/production-ui.css'),'utf8');
+ assert.match(html,/production-ui\.css/);
+ assert.match(studio,/function updateProductionOverview\(/);
+ assert.match(studio,/class="scene production-scene"/);
+ assert.match(css,/\.production-progress/);
+});
