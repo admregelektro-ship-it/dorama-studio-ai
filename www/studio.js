@@ -164,7 +164,7 @@ async function callVideoProvider(action,payload){
  const {data:{session}}=await sb.auth.getSession();
  if(!session?.access_token)throw Error('Entre na sua conta para gerar vídeos.');
  const {data,error}=await sb.functions.invoke('generate-video',{body:{action,...payload}});
- if(error)throw Error(data?.error||error.message||'Provedor indisponível.');
+ if(error){let detail=data;try{if(error.context&&typeof error.context.json==='function')detail=await error.context.json();}catch(_){}throw Error(detail?.error||detail?.message||error.message||'Provedor indisponível.');}
  if(data?.error)throw Error(data.error);
  return data;
 }
