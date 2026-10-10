@@ -9,3 +9,16 @@ test('todos os scripts inline e módulos têm sintaxe válida',()=>{for(const ma
 test('não há seleção por posição, SDK via CDN nem deleção de tabelas na sincronização',()=>{const cloud=fs.readFileSync(path.join(root,'www/cloud-sync.js'),'utf8');assert.doesNotMatch(html,/episodes\[(?:selectedEpisode|n)-1\]/);assert.doesNotMatch(html,/cdn\.jsdelivr/);assert.doesNotMatch(cloud,/\.delete\(/);assert.match(cloud,/eq\('user_id',userId\)/);});
 test('dependências Capacitor são consistentes e versão da UI acompanha package',()=>{const p=require('../package.json');assert.equal(p.dependencies['@capacitor/core'],p.dependencies['@capacitor/android']);assert.equal(p.dependencies['@capacitor/core'],p.devDependencies['@capacitor/cli']);assert.match(html,new RegExp('appVersion: "'+p.version.replaceAll('.','\\.')+'"'));});
 test('build empacota SDK e workflow executa testes antes do APK',()=>{const build=fs.readFileSync(path.join(root,'scripts/build.cjs'),'utf8'),workflow=fs.readFileSync(path.join(root,'.github/workflows/android-apk.yml'),'utf8');assert.match(build,/@supabase\/supabase-js/);assert.match(build,/outfile:'www\/vendor.js'/);assert.ok(workflow.indexOf('npm test')<workflow.indexOf('assembleDebug'));assert.match(workflow,/pull_request:/);});
+
+test('memória narrativa fica recolhida sem remover dados de continuidade',()=>{
+  assert.match(html,/<details class="card memory narrative-drawer">/);
+  assert.match(html,/<p id="memory"/);
+  assert.doesNotMatch(html,/<details class="card memory narrative-drawer" open/);
+});
+test('estúdio inclui painel de produção e verificação sem prometer geração fictícia',()=>{
+  const studio=fs.readFileSync(path.join(root,'www/studio.js'),'utf8');
+  assert.match(html,/class="card production-hub"/);
+  assert.match(studio,/function checkEpisodeProduction\(/);
+  assert.match(studio,/geração automática por IA não está conectada/);
+  assert.match(studio,/function fillMissingSceneDurations\(/);
+});
