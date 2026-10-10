@@ -30,7 +30,7 @@ jobs:
               assert info.filename.startswith(prefix), f'Unexpected ZIP path: {info.filename}'
               relative=pathlib.PurePosixPath(info.filename[len(prefix):])
               assert relative.parts and '..' not in relative.parts, 'Unsafe ZIP path'
-              if relative.as_posix() in ('CHECKSUMS.sha256','test-results/test-report.txt','CONFIGURAR-E-VALIDAR.txt','MANIFEST.json','github/workflows/android-apk.yml'): continue
+              if relative.as_posix() in ('CHECKSUMS.sha256','test-results/test-report.txt','CONFIGURAR-E-VALIDAR.txt','MANIFEST.json','github/workflows/android-apk.yml','.github/workflows/android-apk.yml'): continue
               dest=root.joinpath(*relative.parts)
               assert dest.resolve().is_relative_to(root), 'Unsafe extraction target'
               dest.parent.mkdir(parents=True,exist_ok=True)
