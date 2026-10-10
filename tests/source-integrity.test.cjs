@@ -1,0 +1,11 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const html=fs.readFileSync(path.join(root,'www/index.html'),'utf8');
+test('todos os scripts inline e módulos têm sintaxe válida',()=>{for(const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);for(const name of ['project-store.js','studio.js','cloud-sync.js'])new vm.Script(fs.readFileSync(path.join(root,'www',name),'utf8'));});
+test('não há seleção por posição, SDK via CDN nem deleção de tabelas na sincronização',()=>{const cloud=fs.readFileSync(path.join(root,'www/cloud-sync.js'),'utf8');assert.doesNotMatch(html,/episodes\[(?:selectedEpisode|n)-1\]/);assert.doesNotMatch(html,/cdn\.jsdelivr/);assert.doesNotMatch(cloud,/\.delete\(/);assert.match(cloud,/eq\('user_id',userId\)/);});
+test('dependências Capacitor são consistentes e versão da UI acompanha package',()=>{const p=require('../package.json');assert.equal(p.dependencies['@capacitor/core'],p.dependencies['@capacitor/android']);assert.equal(p.dependencies['@capacitor/core'],p.devDependencies['@capacitor/cli']);assert.match(html,new RegExp('appVersion: "'+p.version.replaceAll('.','\\.')+'"'));});
+test('build empacota SDK e workflow executa testes antes do APK',()=>{const build=fs.readFileSync(path.join(root,'scripts/build.cjs'),'utf8'),workflow=fs.readFileSync(path.join(root,'.github/workflows/android-apk.yml'),'utf8');assert.match(build,/@supabase\/supabase-js/);assert.match(build,/outfile:'www\/vendor.js'/);assert.ok(workflow.indexOf('npm test')<workflow.indexOf('assembleDebug'));assert.match(workflow,/pull_request:/);});
